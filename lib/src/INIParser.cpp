@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   INIParser.cpp
  * Author: Adrian Peniak
- * 
+ *
  * Created on September 30, 2017, 21:07 PM
  */
 
@@ -34,7 +34,7 @@ namespace
         };
         return std::find_if(str.begin()+offset, str.end(), fcn);
     }
-    
+
     template<class T>
     void transformReservedChars(std::string& str, const T& reservedChars, const size_t offset = 0)
     {
@@ -65,11 +65,11 @@ namespace
         des.assign(src, start, end);
         trimStr(des);
     }
-    
+
     class INIFile
     {
     public:
-        INIFile(const std::string& filePath) 
+        INIFile(const std::string& filePath)
         : m_line(),
           m_section(),
           m_key(),
@@ -80,12 +80,12 @@ namespace
           m_map()
         {}
         ~INIFile() = default;
-        
+
         const std::map<std::string, std::string>& getMap()
         {
             return m_map;
-        }    
-        
+        }
+
         bool parseFile()
         {
             bool ret = true;
@@ -98,7 +98,7 @@ namespace
             }
 
             size_t lineNo = 0;
-            while (std::getline(file, m_line)) 
+            while (std::getline(file, m_line))
             {
                 lineNo++;
                 if(m_line.empty()) continue;
@@ -115,13 +115,13 @@ namespace
             file.close();
             return ret;
         }
-        
+
     private:
         bool onlyWhitespace() const
         {
             return (m_line.find_first_not_of(' ') == m_line.npos);
         }
-        
+
         void removeComment()
         {
             auto it = findChar(m_line, m_comments);
@@ -143,7 +143,7 @@ namespace
                 {
                     if(!tryFindKeyValuePair()) // Find key=value pair in line
                     {
-                        if(tryAppendValue()) // Continue multi-line  
+                        if(tryAppendValue()) // Continue multi-line
                         {
                             if(!m_section.empty() && !m_key.empty()) m_map[m_section + ":" + m_key] = m_value;
                             else return false;
@@ -152,7 +152,7 @@ namespace
                         {
                             return false;
                         }
-                    } 
+                    }
                     else
                     {
                         if(!m_section.empty() && !m_key.empty())
@@ -169,7 +169,7 @@ namespace
                     }
                 }
                 return true;
-            }            
+            }
             return false;
         }
 
@@ -188,7 +188,7 @@ namespace
             }
             return false;
         }
-        
+
         bool tryFindKeyValuePair()
         {
             if((m_line.front() != '=')||(m_line.front() != ':'))
@@ -206,12 +206,12 @@ namespace
             }
             return false;
         }
-        
+
         bool validLine(size_t offset = 0)
         {
             return (findChar(m_line, m_separators, offset) == m_line.cend());
         }
- 
+
         bool tryAppendValue()
         {
             if(!validLine()) return false;
@@ -221,7 +221,7 @@ namespace
             m_value+= "\n" + m_line;
             return true;
         }
-        
+
     private:
         std::string m_line;
         std::string m_section;
@@ -241,7 +241,7 @@ namespace ini
         static INIParser instance;
         return instance;
     }
-    
+
     bool INIParser::parseFile(const std::string& filePath)
     {
         INIFile ini(filePath);
@@ -259,7 +259,7 @@ namespace ini
         }
         return false;
     }
-    
+
     void INIParser::dump() const
     {
         for(const auto& it : m_map)
@@ -267,27 +267,7 @@ namespace ini
             std::cout << "[dump]..." << it.first << " = " << it.second << "\n";
         }
     }
-    
-    bool INIParser::tryConverStingFromMap(const std::string& key, std::function<void(const std::string& str)> fcn) const
-    {
-        auto search = m_map.find(key);
-        if(search == m_map.cend())
-        {
-            return false;
-        }
-        else
-        {
-            try 
-            {
-                fcn(search->second);
-            } 
-            catch (const std::invalid_argument& e) 
-            {
-                std::cerr << "[error]...INIParser::tryConverSting(): catch exception \"invalid_argument\" "
-                          << "(" << e.what() << ") ""during conversion: " << search->second << "\n";
-                return false;
-            }
-        }
-        return true;
-    }
+
 } // namespace ini
+
+
